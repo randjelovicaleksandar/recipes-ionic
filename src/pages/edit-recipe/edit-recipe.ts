@@ -6,6 +6,7 @@ import {
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {query} from "@angular/core/src/animation/dsl";
 import {RecipesService} from "../../services/recipes";
+import {Recipe} from "../../models/recipe";
 
 @IonicPage()
 @Component({
@@ -16,6 +17,8 @@ export class EditRecipePage implements OnInit {
   mode = 'New';
   selectOptions = ['Easy', 'Medium', 'Hard'];
   recipeForm: FormGroup;
+  recipe: Recipe;
+  index: number;
 
   constructor(private navParams: NavParams, private actionSheetController: ActionSheetController,
               private alertCtrl: AlertController, private toastCtrl: ToastController,
@@ -24,6 +27,10 @@ export class EditRecipePage implements OnInit {
 
   ngOnInit() {
     this.mode = this.navParams.get('mode');
+    if (this.mode == 'Edit') {
+      this.recipe = this.navParams.get('recipe');
+      this.index = this.navParams.get('index');
+    }
     this.initializeForm();
   }
 
@@ -35,7 +42,11 @@ export class EditRecipePage implements OnInit {
         return {name: name, amount: 1};
       });
     }
-    this.recipesService.addRecipe(value.title, value.description, value.description, value.ingredients);
+    if (this.mode == 'Edit') {
+      this.recipesService.updateRecipe(this.index, value.title, value.description, value.description, value.ingredients);
+    } else {
+      this.recipesService.addRecipe(value.title, value.description, value.description, value.ingredients);
+    }
     this.recipeForm.reset();
     this.navCtrl.popToRoot();
   }
@@ -119,11 +130,25 @@ export class EditRecipePage implements OnInit {
   }
 
   private initializeForm() {
+    let title = null;
+    let description = null;
+    let difficulty = 'Medium';
+    let ingredients = [];
+
+    if (this.mode == 'Edit') {
+      title = this.recipe.title;
+      description = this.recipe.description;
+      difficulty = this.recipe.difficulty;
+      for (let ingredient of this.recipe.ingredients) {
+        ingredients.push(new FormControl(ingredient.name, Validators.required));
+      }
+    }
+
     this.recipeForm = new FormGroup({
-      'title': new FormControl(null, Validators.required),
-      'description': new FormControl(null, Validators.required),
-      'difficulty': new FormControl('Medium', Validators.required),
-      'ingredients': new FormArray([])
+      'title': new FormControl(title, Validators.required),
+      'description': new FormControl(description, Validators.required),
+      'difficulty': new FormControl(difficulty, Validators.required),
+      'ingredients': new FormArray(ingredients)
     });
   }
 }

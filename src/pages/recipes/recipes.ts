@@ -3,6 +3,7 @@ import {IonicPage, NavController} from 'ionic-angular';
 import {EditRecipePage} from "../edit-recipe/edit-recipe";
 import {Recipe} from "../../models/recipe";
 import {RecipesService} from "../../services/recipes";
+import {RecipePage} from "../recipe/recipe";
 
 @IonicPage()
 @Component({
@@ -23,7 +24,7 @@ export class RecipesPage {
     this.navCtrl.push(EditRecipePage, {mode: 'new'});
   }
 
-  onLoadRecipe() {
-
+  onLoadRecipe(recipe: Recipe, index: number) {
+    this.navCtrl.push(RecipePage, {recipe: recipe, index: index});
   }
 }
